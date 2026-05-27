@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau Date Functions & Table Calculations — Cheat Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232736;
+    --border: #2e3348;
+    --text: #e2e4ed;
+    --text-dim: #8b8fa7;
+    --accent: #6c8aff;
+    --accent2: #ff6c8a;
+    --green: #4ade80;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --code-bg: #141720;
+    --tag-bg: rgba(108,138,255,0.12);
+    --sidebar-w: 260px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 1.25rem 0;
+    z-index: 100;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-logo {
+    padding: 0 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.3px;
+  }
+
+  .sidebar-group { padding: 0.5rem 0 0.25rem; }
+
+  .sidebar-group-title {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    padding: 0.5rem 1.25rem 0.35rem;
+    font-weight: 600;
+  }
+
+  .sidebar a {
+    display: block;
+    padding: 0.35rem 1.25rem;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .sidebar a:hover {
+    color: var(--text);
+    background: rgba(108,138,255,0.06);
+    border-left-color: var(--accent);
+  }
+  .sidebar a.active {
+    color: var(--accent);
+    background: rgba(108,138,255,0.08);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ===== MAIN ===== */
+  .main {
+    margin-left: var(--sidebar-w);
+    padding: 2rem 2.5rem;
+    max-width: calc(1100px + var(--sidebar-w));
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  header {
+    text-align: center;
+    padding: 1.5rem 0 2.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  header p { color: var(--text-dim); margin-top: 0.4rem; font-size: 0.9rem; }
+
+  .section {
+    margin-bottom: 3rem;
+    scroll-margin-top: 1.5rem;
+  }
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-title .num {
+    background: var(--accent);
+    color: var(--bg);
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Function Cards */
+  .func-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 1rem;
+  }
+  .func-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+  }
+  .func-card:hover { border-color: var(--accent); }
+  .func-card h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--green);
+    margin-bottom: 0.3rem;
+  }
+  .func-card .desc { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.65rem; }
+
+  code, .code-block { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+    overflow-x: auto;
+    color: var(--text);
+    line-height: 1.5;
+    white-space: pre;
+  }
+  .func-card .code-block { margin-bottom: 0.5rem; }
+
+  .tag {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--accent);
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tag.warn { background: rgba(245,158,11,0.12); color: var(--orange); }
+  .tag.danger { background: rgba(239,68,68,0.12); color: var(--red); }
+  .tag.good { background: rgba(74,222,128,0.12); color: var(--green); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 1rem; }
+  thead th {
+    background: var(--surface2);
+    color: var(--accent);
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent);
+  }
+  tbody td { padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:hover { background: rgba(108,138,255,0.04); }
+  td code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; color: var(--green); font-size: 0.78rem; }
+
+  /* Callouts */
+  .callout { border-radius: 10px; padding: 1.15rem; margin-bottom: 1rem; border-left: 4px solid; }
+  .callout.trap { background: rgba(239,68,68,0.06); border-color: var(--red); }
+  .callout.tip { background: rgba(74,222,128,0.06); border-color: var(--green); }
+  .callout.info { background: rgba(108,138,255,0.06); border-color: var(--accent); }
+  .callout h4 { font-size: 0.88rem; margin-bottom: 0.4rem; }
+  .callout.trap h4 { color: var(--red); }
+  .callout.tip h4 { color: var(--green); }
+  .callout.info h4 { color: var(--accent); }
+  .callout p, .callout li { font-size: 0.82rem; color: var(--text-dim); }
+  .callout ul { padding-left: 1.25rem; margin-top: 0.3rem; }
+  .callout li { margin-bottom: 0.2rem; }
+
+  /* Calc cards */
+  .calc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+    gap: 1rem;
+  }
+  .calc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.15rem;
+  }
+  .calc-card h4 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin-bottom: 0.65rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* VS row */
+  .vs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .vs-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.15rem; }
+  .vs-box h4 { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; margin-bottom: 0.45rem; }
+  .vs-box.left h4 { color: var(--accent); }
+  .vs-box.right h4 { color: var(--accent2); }
+  .desc { font-size: 0.82rem; color: var(--text-dim); }
+
+  /* Best practice grid */
+  .bp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; }
+  .bp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.15rem; }
+  .bp-card h4 { font-family: 'JetBrains Mono', monospace; color: var(--green); font-size: 0.88rem; margin-bottom: 0.45rem; }
+  .bp-card ul { padding-left: 1.25rem; font-size: 0.82rem; color: var(--text-dim); }
+  .bp-card li { margin-bottom: 0.2rem; }
+
+  /* Golden */
+  .golden {
+    background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(108,138,255,0.08));
+    border: 1px solid var(--orange);
+    border-radius: 10px;
+    padding: 1.35rem;
+  }
+  .golden h4 { color: var(--orange); font-size: 0.95rem; margin-bottom: 0.65rem; }
+  .golden ul { padding-left: 1.25rem; font-size: 0.88rem; }
+  .golden li { margin-bottom: 0.3rem; color: var(--text); }
+
+  /* ===== Q&A CARDS ===== */
+  .qa-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+  .qa-q {
+    padding: 0.85rem 1.15rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .qa-q:hover { background: rgba(108,138,255,0.04); }
+  .qa-q .q-num {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 22px;
+  }
+  .qa-q .arrow {
+    margin-left: auto;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .qa-card.open .qa-q .arrow { transform: rotate(180deg); }
+  .qa-a { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .qa-card.open .qa-a { max-height: 1500px; }
+  .qa-a-inner {
+    padding: 0 1.15rem 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.85rem;
+  }
+  .qa-a-inner p { font-size: 0.84rem; color: var(--text-dim); margin-bottom: 0.5rem; line-height: 1.6; }
+  .qa-a-inner p strong { color: var(--text); }
+  .qa-a-inner .code-block { margin: 0.5rem 0; }
+
+  /* Part divider */
+  .part-divider {
+    text-align: center;
+    padding: 2rem 0 2.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+    margin-top: 1rem;
+  }
+  .part-divider h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .part-divider p { color: var(--text-dim); margin-top: 0.35rem; font-size: 0.88rem; }
+
+  /* ===== MOBILE ===== */
+  .burger {
+    display: none;
+    position: fixed;
+    top: 0.75rem; left: 0.75rem;
+    z-index: 200;
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .burger span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 1px; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+    .sidebar.open { transform: translateX(0); }
+    .overlay.open { display: block; }
+    .burger { display: flex; }
+    .main { margin-left: 0; padding: 3.5rem 1rem 2rem; }
+    .func-grid, .calc-grid, .bp-grid { grid-template-columns: 1fr; }
+    .vs-row { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BURGER -->
+<div class="burger" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.overlay').classList.toggle('open');">
+  <span></span><span></span><span></span>
+</div>
+<div class="overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open');"></div>
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar">
+  <div class="sidebar-logo">Tableau Cheat Sheet</div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Date Functions</div>
+    <a href="#s1">Core Date Functions</a>
+    <a href="#s2">YEAR() vs DATETRUNC()</a>
+    <a href="#s3">Common Interview Trap</a>
+    <a href="#s4">Essential Date Calculations</a>
+    <a href="#s5">Common Flags</a>
+    <a href="#s6">First & Last Day of Month</a>
+    <a href="#s7">LOD — Latest Available Date</a>
+    <a href="#s8">Discrete vs Continuous</a>
+    <a href="#s9">When to Use What</a>
+    <a href="#s10">Date Q&A — With Answers</a>
+    <a href="#s11">Golden Rules</a>
+    <a href="#s12">Quick Reference</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Table Calculations</div>
+    <a href="#s13">All Table Calcs Overview</a>
+    <a href="#s14">Top 5 — Most Asked</a>
+    <a href="#s15">WINDOW Functions</a>
+    <a href="#s16">LOOKUP & Position Functions</a>
+    <a href="#s17">Partitioning vs Addressing</a>
+    <a href="#s18">Order of Operations</a>
+    <a href="#s19">Table Calc Q&A — Answers</a>
+    <a href="#s20">Golden Formulas</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Bonus</div>
+    <a href="#s21">LOD Expressions Q&A</a>
+    <a href="#s22">Filters & Performance Q&A</a>
+    <a href="#s23">Dashboard & Design Q&A</a>
+  </div>
+</nav>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+<div class="container">
+
+<header>
+  <h1>Tableau Date Functions & Table Calculations</h1>
+  <p>Complete Interview Cheat Sheet — Click any question to reveal sample answers</p>
+</header>
+
+<!-- ==================== DATE FUNCTIONS ==================== -->
+
+<!-- S1 -->
+<div class="section" id="s1">
+  <h2 class="section-title"><span class="num">1</span> Core Date Functions</h2>
+  <div class="func-grid">
+    <div class="func-card">
+      <h3>YEAR() / MONTH() / DAY()</h3>
+      <p class="desc">Extract numeric year, month, or day from a date.</p>
+      <div class="code-block">YEAR([Order Date])   → 2026
+MONTH([Order Date])  → 5
+DAY([Order Date])    → 26</div>
+      <span class="tag">returns integer</span>
+    </div>
+    <div class="func-card">
+      <h3>DATEPART()</h3>
+      <p class="desc">Extract any numeric component from a date.</p>
+      <div class="code-block">DATEPART('month', [Order Date])  → 5
+DATEPART('weekday', [Order Date]) → 3</div>
+      <span class="tag">returns integer</span>
+    </div>
+    <div class="func-card">
+      <h3>DATENAME()</h3>
+      <p class="desc">Extract the text name of a date component.</p>
+      <div class="code-block">DATENAME('month', [Order Date]) → "May"
+DATENAME('weekday', [Order Date]) → "Tuesday"</div>
+      <span class="tag">returns string</span>
+    </div>
+    <div class="func-card">
+      <h3>DATETRUNC()</h3>
+      <p class="desc">Rounds date down to specified granularity. Preserves date datatype.</p>
+      <div class="code-block">DATETRUNC('month', #2026-05-26#)
+→ #2026-05-01#
+
+DATETRUNC('year', #2026-05-26#)
+→ #2026-01-01#</div>
+      <span class="tag good">returns date</span>
+    </div>
+    <div class="func-card">
+      <h3>DATEDIFF()</h3>
+      <p class="desc">Calculates interval difference between two dates.</p>
+      <div class="code-block">DATEDIFF('day', [Order Date], [Ship Date])
+DATEDIFF('month', #2026-01-01#, #2026-05-26#) → 4</div>
+      <span class="tag">returns integer</span>
+    </div>
+    <div class="func-card">
+      <h3>DATEADD()</h3>
+      <p class="desc">Add or subtract intervals from a date.</p>
+      <div class="code-block">DATEADD('month', -12, TODAY())
+DATEADD('day', 7, [Order Date])</div>
+      <span class="tag good">returns date</span>
+    </div>
+    <div class="func-card">
+      <h3>TODAY()</h3>
+      <p class="desc">Returns current system date (no time).</p>
+      <div class="code-block">TODAY() → #2026-05-26#</div>
+      <span class="tag good">returns date</span>
+    </div>
+    <div class="func-card">
+      <h3>NOW()</h3>
+      <p class="desc">Returns current system date + time.</p>
+      <div class="code-block">NOW() → #2026-05-26 14:30:00#</div>
+      <span class="tag good">returns datetime</span>
+    </div>
+  </div>
+</div>
+
+<!-- S2 -->
+<div class="section" id="s2">
+  <h2 class="section-title"><span class="num">2</span> YEAR() vs DATETRUNC() — Key Interview Concept</h2>
+  <div class="vs-row">
+    <div class="vs-box left">
+      <h4>YEAR()</h4>
+      <p class="desc">Extraction function</p>
+      <div class="code-block">YEAR(#2026-05-26#) → 2026</div>
+      <p style="margin-top:0.5rem;font-size:0.82rem;color:var(--text-dim);">Returns: <strong style="color:var(--orange)">Integer</strong></p>
+      <p style="font-size:0.82rem;color:var(--text-dim);">Use for: comparisons, flags, filtering</p>
+    </div>
+    <div class="vs-box right">
+      <h4>DATETRUNC('year')</h4>
+      <p class="desc">Normalization / truncation function</p>
+      <div class="code-block">DATETRUNC('year', #2026-05-26#)
+→ #2026-01-01#</div>
+      <p style="margin-top:0.5rem;font-size:0.82rem;color:var(--text-dim);">Returns: <strong style="color:var(--green)">Date</strong></p>
+      <p style="font-size:0.82rem;color:var(--text-dim);">Use for: trend lines, rolling periods, axis alignment</p>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Aspect</th><th>YEAR()</th><th>DATETRUNC('year')</th></tr></thead>
+    <tbody>
+      <tr><td>Return type</td><td>Integer</td><td>Date</td></tr>
+      <tr><td>Example output</td><td><code>2026</code></td><td><code>01-Jan-2026</code></td></tr>
+      <tr><td>Purpose</td><td>Extract / compare</td><td>Normalize / align</td></tr>
+      <tr><td>Axis behavior</td><td>Discrete headers</td><td>Continuous timeline</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S3 -->
+<div class="section" id="s3">
+  <h2 class="section-title"><span class="num">3</span> Common Interview Trap</h2>
+  <div class="callout trap">
+    <h4>❌ Wrong — Mismatched comparison</h4>
+    <div class="code-block" style="margin-top:0.5rem;">IF DATETRUNC('year', [Order Date]) = MAX([Order Date])
+THEN SUM([Sales]) END</div>
+    <p style="margin-top:0.75rem;"><strong>Why it fails:</strong> <code>DATETRUNC</code> returns <code style="color:var(--orange)">01-Jan-2026</code> but <code>MAX</code> returns <code style="color:var(--orange)">31-Dec-2026</code>. They will never match.</p>
+  </div>
+  <div class="callout tip">
+    <h4>✅ Fix 1 — Use YEAR() on both sides</h4>
+    <div class="code-block" style="margin-top:0.5rem;">IF YEAR([Order Date])
+ = YEAR({ FIXED : MAX([Order Date]) })
+THEN [Sales]
+END</div>
+  </div>
+  <div class="callout tip">
+    <h4>✅ Fix 2 — Use DATETRUNC() on both sides</h4>
+    <div class="code-block" style="margin-top:0.5rem;">IF DATETRUNC('year', [Order Date])
+ = DATETRUNC('year', { FIXED : MAX([Order Date]) })
+THEN [Sales]
+END</div>
+  </div>
+</div>
+
+<!-- S4 -->
+<div class="section" id="s4">
+  <h2 class="section-title"><span class="num">4</span> Essential Date Calculations</h2>
+  <div class="calc-grid">
+    <div class="calc-card">
+      <h4><span class="tag good">YTD</span> Year-To-Date Sales</h4>
+      <div class="code-block">IF YEAR([Order Date]) = YEAR(TODAY())
+THEN [Sales]
+END</div>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag good">MTD</span> Month-To-Date Sales</h4>
+      <div class="code-block">IF DATETRUNC('month', [Order Date])
+ = DATETRUNC('month', TODAY())
+THEN [Sales]
+END</div>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag">QTR</span> Current Quarter Filter</h4>
+      <div class="code-block">DATETRUNC('quarter', [Order Date])
+ = DATETRUNC('quarter', TODAY())</div>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag">PREV</span> Previous Month</h4>
+      <div class="code-block">DATETRUNC('month', [Order Date])
+ = DATEADD('month', -1,
+     DATETRUNC('month', TODAY()))</div>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag warn">ROLL</span> Rolling 12 Months</h4>
+      <div class="code-block">[Order Date] >= DATEADD('month', -12, TODAY())</div>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag warn">RUN</span> Running Sum — Last 13 Months</h4>
+      <div class="code-block">// Filter:
+[Order Date] >= DATEADD('month', -12,
+  { FIXED : MAX([Order Date]) })
+
+// Then apply:
+RUNNING_SUM(SUM([Sales]))</div>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag">30D</span> Last 30 Days</h4>
+      <div class="code-block">DATEDIFF('day', [Order Date], TODAY()) &lt;= 30</div>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag">FY</span> Fiscal Year (April Start)</h4>
+      <div class="code-block">IF MONTH([Order Date]) >= 4
+THEN YEAR([Order Date])
+ELSE YEAR([Order Date]) - 1
+END</div>
+    </div>
+  </div>
+</div>
+
+<!-- S5 -->
+<div class="section" id="s5">
+  <h2 class="section-title"><span class="num">5</span> Common Flags</h2>
+  <div class="calc-grid">
+    <div class="calc-card">
+      <h4>Current Year Flag</h4>
+      <div class="code-block">YEAR([Order Date])
+ = YEAR({ FIXED : MAX([Order Date]) })</div>
+    </div>
+    <div class="calc-card">
+      <h4>Current Month Flag</h4>
+      <div class="code-block">DATETRUNC('month', [Order Date])
+ = DATETRUNC('month',
+     { FIXED : MAX([Order Date]) })</div>
+    </div>
+    <div class="calc-card">
+      <h4>Weekend vs Weekday</h4>
+      <div class="code-block">IF DATEPART('weekday', [Order Date]) IN (1,7)
+THEN "Weekend"
+ELSE "Weekday"
+END</div>
+    </div>
+  </div>
+</div>
+
+<!-- S6 -->
+<div class="section" id="s6">
+  <h2 class="section-title"><span class="num">6</span> First & Last Day of Month</h2>
+  <div class="vs-row">
+    <div class="vs-box left">
+      <h4>First Day</h4>
+      <div class="code-block">DATETRUNC('month', [Order Date])</div>
+    </div>
+    <div class="vs-box right">
+      <h4>Last Day</h4>
+      <div class="code-block">DATEADD('day', -1,
+  DATEADD('month', 1,
+    DATETRUNC('month', [Order Date])
+  )
+)</div>
+    </div>
+  </div>
+</div>
+
+<!-- S7 -->
+<div class="section" id="s7">
+  <h2 class="section-title"><span class="num">7</span> LOD — Latest Available Date</h2>
+  <div class="callout info">
+    <h4>{ FIXED : MAX([Order Date]) }</h4>
+    <ul>
+      <li>Dashboards may not have today's data — dataset might refresh daily with a lag</li>
+      <li>Use the dataset's actual max date instead of <code>TODAY()</code></li>
+      <li>This gives a row-level scalar you can compare against without aggregation issues</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S8 -->
+<div class="section" id="s8">
+  <h2 class="section-title"><span class="num">8</span> Discrete vs Continuous Dates</h2>
+  <table>
+    <thead><tr><th>Aspect</th><th style="color:#6c8aff;">🔵 Discrete (Blue)</th><th style="color:#4ade80;">🟢 Continuous (Green)</th></tr></thead>
+    <tbody>
+      <tr><td>Behavior</td><td>Categorical headers</td><td>Continuous timeline axis</td></tr>
+      <tr><td>Use when</td><td>Comparing specific periods</td><td>Showing trends over time</td></tr>
+      <tr><td>Pill color</td><td>Blue</td><td>Green</td></tr>
+      <tr><td>Creates</td><td>Column/row headers</td><td>Axis with ticks</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S9 -->
+<div class="section" id="s9">
+  <h2 class="section-title"><span class="num">9</span> When to Use What</h2>
+  <div class="bp-grid">
+    <div class="bp-card">
+      <h4>YEAR()</h4>
+      <ul><li>Simple year comparisons</li><li>Year-based flags</li><li>Filtering by year</li></ul>
+    </div>
+    <div class="bp-card">
+      <h4>DATETRUNC()</h4>
+      <ul><li>Trend analysis on continuous axis</li><li>Rolling period calculations</li><li>Month / quarter / year alignment</li></ul>
+    </div>
+    <div class="bp-card">
+      <h4>{ FIXED : MAX(Date) }</h4>
+      <ul><li>Dataset's latest available date</li><li>Dashboard refresh has delay</li><li>Avoid dependency on TODAY()</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- ========== S10: DATE Q&A WITH ANSWERS ========== -->
+<div class="section" id="s10">
+  <h2 class="section-title"><span class="num">10</span> Date Function Q&A — With Sample Answers</h2>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">01</span> Difference between YEAR() and DATETRUNC()? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>YEAR()</strong> extracts the year as an <strong>integer</strong> (e.g., 2026). <strong>DATETRUNC('year')</strong> returns the <strong>first day of that year as a date</strong> (e.g., 01-Jan-2026).</p>
+      <p><strong>Key difference:</strong> YEAR() is for simple comparisons and flags. DATETRUNC() is needed for a continuous date axis (trend lines, forecasts). Mixing them in a comparison causes a datatype mismatch error.</p>
+      <div class="code-block">YEAR([Order Date]) → 2026              // integer
+DATETRUNC('year', [Order Date]) → 01-Jan-2026  // date</div>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">02</span> Difference between DATEPART() and DATENAME()? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>DATEPART()</strong> returns a <strong>number</strong>. <strong>DATENAME()</strong> returns <strong>text</strong>.</p>
+      <p>Use DATEPART when you need to sort or do math (e.g., weekday = 1 for Sunday). Use DATENAME when you need display labels ("January", "Monday").</p>
+      <div class="code-block">DATEPART('month', [Order Date])  → 5       // integer
+DATENAME('month', [Order Date])  → "May"    // string</div>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">03</span> Difference between TODAY() and NOW()? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>TODAY()</strong> = current date only (no time). <strong>NOW()</strong> = date + time.</p>
+      <p><strong>Why it matters:</strong> If you use NOW() in a DATEDIFF calculation, the time part can cause off-by-one errors. For day-level comparisons, always use TODAY().</p>
+      <div class="code-block">TODAY() → 2026-05-26
+NOW()   → 2026-05-26 14:30:22</div>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">04</span> Why use DATETRUNC() for trend analysis? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>Because DATETRUNC returns an actual <strong>date</strong>, Tableau can place it on a <strong>continuous axis</strong>. This creates a proper timeline with evenly spaced ticks — needed for trend lines, reference lines, and forecasts.</p>
+      <p>If you use DATEPART or YEAR instead, you get discrete headers — no continuous axis, no trend line, and months from different years can overlap visually.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">05</span> Why use { FIXED : MAX(Date) } instead of TODAY()? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>Real-world data has a <strong>refresh lag</strong>. If data only goes up to 3 days ago, TODAY() shows an empty "current period" — misleading for users.</p>
+      <p><code>{ FIXED : MAX([Order Date]) }</code> uses the dataset's <strong>actual latest date</strong>, so YTD / current month calculations always align with available data. It's also a row-level scalar — no aggregation issues when comparing.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">06</span> Write a YTD calculation <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">// Simple:
+IF YEAR([Order Date]) = YEAR(TODAY())
+THEN [Sales] END
+
+// Better (uses dataset max date):
+IF YEAR([Order Date])
+ = YEAR({ FIXED : MAX([Order Date]) })
+THEN [Sales] END</div>
+      <p>The second version is better for production — doesn't depend on system clock.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">07</span> Write an MTD calculation <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">IF DATETRUNC('month', [Order Date])
+ = DATETRUNC('month', TODAY())
+THEN [Sales] END</div>
+      <p>Uses DATETRUNC to compare at month level — all dates in the current month get their sales included, everything else returns NULL.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">08</span> How to do rolling 12 months? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">// As a filter:
+[Order Date] >= DATEADD('month', -12, TODAY())
+
+// Better — using dataset max date:
+[Order Date] >= DATEADD('month', -12,
+  { FIXED : MAX([Order Date]) })</div>
+      <p>Second approach won't break if data has a refresh delay. Use as a calculated field filter or context filter.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">09</span> Running sum — how and when? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">RUNNING_SUM(SUM([Sales]))</div>
+      <p><strong>How:</strong> It's a table calculation. Add via Quick Table Calculation or write the formula. Configure "Compute Using" to set direction (e.g., across months).</p>
+      <p><strong>When:</strong> Cumulative revenue tracking, YTD progression, showing how a metric builds over time. Partitioning resets it per group (e.g., per region).</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">10</span> Fiscal year logic? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>For a fiscal year starting in <strong>April</strong> (common in India):</p>
+      <div class="code-block">IF MONTH([Order Date]) >= 4
+THEN YEAR([Order Date])
+ELSE YEAR([Order Date]) - 1
+END</div>
+      <p>March 2026 → FY 2025. April 2026 → FY 2026. Tableau also has a built-in fiscal year start under Default Properties, but the calculated field gives more control.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">11</span> Compare current vs previous month? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Method 1 — Calculated fields:</strong></p>
+      <div class="code-block">// Current Month Sales:
+IF DATETRUNC('month',[Order Date])
+ = DATETRUNC('month', TODAY())
+THEN [Sales] END
+
+// Previous Month Sales:
+IF DATETRUNC('month',[Order Date])
+ = DATEADD('month', -1, DATETRUNC('month', TODAY()))
+THEN [Sales] END</div>
+      <p><strong>Method 2 — Table calc:</strong> Use <code>LOOKUP(SUM([Sales]), -1)</code> with months on the addressing axis.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">12</span> Weekend flag logic? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">IF DATEPART('weekday', [Order Date]) IN (1, 7)
+THEN "Weekend"
+ELSE "Weekday"
+END</div>
+      <p><strong>Note:</strong> In Tableau, weekday 1 = Sunday, 7 = Saturday by default. This can change based on locale settings.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">13</span> Continuous vs discrete dates in Tableau? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Discrete (blue pill):</strong> Creates column/row headers. Each value is a separate bucket. Good for bar charts comparing Jan vs Feb vs Mar.</p>
+      <p><strong>Continuous (green pill):</strong> Creates an axis. Values plotted on a timeline. Good for line charts. Supports trend lines, reference lines, forecasts.</p>
+      <p><strong>Switch:</strong> Right-click the date pill → choose Discrete or Continuous.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">14</span> Why do date comparisons fail? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>The #1 reason: <strong>datatype mismatch</strong>. Comparing integer to date, or row-level field to aggregate.</p>
+      <p>• DATETRUNC returns date, YEAR returns integer — can't compare directly</p>
+      <p>• MAX([Date]) is aggregate, [Date] is row-level — can't use in same IF without LOD</p>
+      <p><strong>Fix:</strong> Same type on both sides. Use { FIXED : MAX() } if you need a row-level scalar from an aggregate.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">15</span> Row-level vs aggregate calculation difference? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Row-level:</strong> Runs on every row. Example: [Sales] * [Discount], YEAR([Order Date]). No aggregation needed.</p>
+      <p><strong>Aggregate:</strong> Runs after data is grouped. Example: SUM([Sales]), MAX([Order Date]). Requires a level of detail (what's on Rows/Columns).</p>
+      <p><strong>Why it matters:</strong> You can't mix them. <code>IF [Order Date] > MAX([Order Date])</code> fails. Use LOD expressions to bridge the gap.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">16</span> How to handle NULL dates? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">// Replace NULL with fallback:
+IFNULL([Ship Date], [Order Date])
+
+// Flag missing dates:
+IF ISNULL([Ship Date])
+THEN "Missing" ELSE "Has Date" END</div>
+      <p>NULL dates are excluded from most calculations by default. Handle them explicitly if your analysis needs them.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">17</span> How to convert a string to a date? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">// If format is known:
+DATEPARSE("dd-MM-yyyy", [Date String])
+
+// If standard format:
+DATE([Date String])</div>
+      <p>DATEPARSE is not available on all data sources (missing for Tableau extracts from Excel). If unavailable, use MAKEDATE() by splitting the string into year, month, day parts first.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">18</span> How to calculate age or tenure from a date? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">// Age in years:
+DATEDIFF('year', [Birth Date], TODAY())
+
+// Tenure in months:
+DATEDIFF('month', [Hire Date], TODAY())
+
+// Days since order:
+DATEDIFF('day', [Order Date], TODAY())</div>
+      <p>DATEDIFF counts date boundaries crossed, not exact elapsed time. For precise age, add logic to check if the birthday has passed this year.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- S11 -->
+<div class="section" id="s11">
+  <h2 class="section-title"><span class="num">11</span> Golden Rules</h2>
+  <div class="golden">
+    <h4>⚡ Always Think About These 5 Things</h4>
+    <ul>
+      <li><strong>Datatype</strong> — Is the result a Date or Integer? Mismatches break comparisons.</li>
+      <li><strong>Granularity</strong> — Are you comparing at the right level (day vs month vs year)?</li>
+      <li><strong>Aggregation level</strong> — Is it row-level or aggregate? Mixing them causes errors.</li>
+      <li><strong>Row-level vs Aggregate</strong> — Can't compare a row-level field with an aggregate directly without LOD.</li>
+      <li><strong>TODAY() vs { FIXED : MAX }</strong> — Real dashboards have stale data. Use dataset max date.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S12 -->
+<div class="section" id="s12">
+  <h2 class="section-title"><span class="num">12</span> Quick Reference — One-Liners</h2>
+  <table>
+    <thead><tr><th>Function</th><th>What It Does</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td><code>DATEPART()</code></td><td>Extract numeric component from date</td><td>Integer</td></tr>
+      <tr><td><code>DATENAME()</code></td><td>Extract text name of date component</td><td>String</td></tr>
+      <tr><td><code>DATETRUNC()</code></td><td>Round down date to specified granularity</td><td>Date</td></tr>
+      <tr><td><code>DATEDIFF()</code></td><td>Interval difference between two dates</td><td>Integer</td></tr>
+      <tr><td><code>DATEADD()</code></td><td>Add / subtract intervals from date</td><td>Date</td></tr>
+      <tr><td><code>TODAY()</code></td><td>Current system date</td><td>Date</td></tr>
+      <tr><td><code>NOW()</code></td><td>Current system date + time</td><td>Datetime</td></tr>
+      <tr><td><code>YEAR()</code></td><td>Extract year as number</td><td>Integer</td></tr>
+      <tr><td><code>MONTH()</code></td><td>Extract month as number</td><td>Integer</td></tr>
+      <tr><td><code>DAY()</code></td><td>Extract day as number</td><td>Integer</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== TABLE CALCULATIONS ==================== -->
+<div class="part-divider" id="tc-part">
+  <h1>Table Calculations</h1>
+  <p>Complete Cheat Sheet — Interview Ready</p>
+</div>
+
+<!-- S13 -->
+<div class="section" id="s13">
+  <h2 class="section-title"><span class="num">13</span> All Table Calculations — Overview</h2>
+  <table>
+    <thead><tr><th>Calculation</th><th>Purpose</th><th>Quick Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>RUNNING_SUM()</code></td><td>Cumulative sum</td><td>Jan=100, Feb=200 → RT Feb=300</td></tr>
+      <tr><td>Difference</td><td>Diff from previous row</td><td>200 − 100 = 100</td></tr>
+      <tr><td>Percent Difference</td><td>% growth / decline</td><td>(200−100)/100 = 100%</td></tr>
+      <tr><td>Moving Average</td><td>Rolling window avg</td><td>Avg of last 3 months</td></tr>
+      <tr><td><code>RANK()</code></td><td>Ranking values</td><td>Highest → Rank 1</td></tr>
+      <tr><td>Percent of Total</td><td>Contribution %</td><td>Product / Total sales</td></tr>
+      <tr><td><code>WINDOW_SUM()</code></td><td>Sum within window</td><td>Total in displayed table</td></tr>
+      <tr><td><code>WINDOW_AVG()</code></td><td>Avg within partition</td><td>Avg of all regions</td></tr>
+      <tr><td><code>WINDOW_MAX/MIN()</code></td><td>High / low in window</td><td>Max among categories</td></tr>
+      <tr><td><code>FIRST()</code></td><td>Offset from first row</td><td>First row = 0</td></tr>
+      <tr><td><code>LAST()</code></td><td>Offset from last row</td><td>Last row = 0</td></tr>
+      <tr><td><code>INDEX()</code></td><td>Row number</td><td>1, 2, 3, 4…</td></tr>
+      <tr><td><code>LOOKUP()</code></td><td>Fetch from another row</td><td>Previous month sales</td></tr>
+      <tr><td><code>PREVIOUS_VALUE()</code></td><td>Previous computed result</td><td>Recursive logic</td></tr>
+      <tr><td><code>SIZE()</code></td><td>Row count in partition</td><td>Products in category</td></tr>
+      <tr><td><code>TOTAL()</code></td><td>Grand total (repeated)</td><td>Total sales every row</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S14 -->
+<div class="section" id="s14">
+  <h2 class="section-title"><span class="num">14</span> Top 5 — Most Asked in Interviews</h2>
+  <div class="calc-grid">
+    <div class="calc-card">
+      <h4><span class="tag good">1</span> Running Total</h4>
+      <p class="desc">Cumulative sum — progressive trend.</p>
+      <div class="code-block">RUNNING_SUM(SUM([Sales]))</div>
+      <table style="margin-top:0.65rem;"><thead><tr><th>Month</th><th>Sales</th><th>Running Total</th></tr></thead><tbody><tr><td>Jan</td><td>100</td><td>100</td></tr><tr><td>Feb</td><td>200</td><td>300</td></tr><tr><td>Mar</td><td>150</td><td>450</td></tr></tbody></table>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag good">2</span> Percent of Total</h4>
+      <p class="desc">Each item's contribution to the whole.</p>
+      <div class="code-block">SUM([Sales]) / TOTAL(SUM([Sales]))</div>
+      <table style="margin-top:0.65rem;"><thead><tr><th>Product</th><th>Sales</th><th>% of Total</th></tr></thead><tbody><tr><td>A</td><td>100</td><td>25%</td></tr><tr><td>B</td><td>300</td><td>75%</td></tr></tbody></table>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag good">3</span> Moving Average (3-Month)</h4>
+      <p class="desc">Smooths fluctuations.</p>
+      <div class="code-block">WINDOW_AVG(SUM([Sales]), -2, 0)</div>
+      <table style="margin-top:0.65rem;"><thead><tr><th>Month</th><th>Sales</th><th>Mov Avg</th></tr></thead><tbody><tr><td>Jan</td><td>100</td><td>—</td></tr><tr><td>Feb</td><td>200</td><td>—</td></tr><tr><td>Mar</td><td>300</td><td>200</td></tr></tbody></table>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag good">4</span> Difference From Previous</h4>
+      <p class="desc">Change from last period.</p>
+      <div class="code-block">SUM([Sales]) - LOOKUP(SUM([Sales]), -1)</div>
+    </div>
+    <div class="calc-card">
+      <h4><span class="tag good">5</span> Rank</h4>
+      <p class="desc">Highest gets Rank 1.</p>
+      <div class="code-block">RANK(SUM([Sales]))</div>
+    </div>
+  </div>
+</div>
+
+<!-- S15 -->
+<div class="section" id="s15">
+  <h2 class="section-title"><span class="num">15</span> WINDOW Functions</h2>
+  <div class="func-grid">
+    <div class="func-card"><h3>WINDOW_SUM()</h3><p class="desc">Sum across the entire visible window.</p><div class="code-block">WINDOW_SUM(SUM([Sales]))</div><span class="tag">same total repeated</span></div>
+    <div class="func-card"><h3>WINDOW_AVG()</h3><p class="desc">Average across the visible window.</p><div class="code-block">WINDOW_AVG(SUM([Sales]))</div><span class="tag">smoothing / benchmarks</span></div>
+    <div class="func-card"><h3>WINDOW_MAX() / MIN()</h3><p class="desc">Highest or lowest in the window.</p><div class="code-block">WINDOW_MAX(SUM([Sales]))
+WINDOW_MIN(SUM([Sales]))</div><span class="tag">peak / trough</span></div>
+    <div class="func-card"><h3>WINDOW_COUNT()</h3><p class="desc">Count of records in the window.</p><div class="code-block">WINDOW_COUNT(SUM([Sales]))</div><span class="tag">partition sizing</span></div>
+    <div class="func-card"><h3>WINDOW_STDEV() / VAR()</h3><p class="desc">Std deviation / variance across the window.</p><div class="code-block">WINDOW_STDEV(SUM([Sales]))
+WINDOW_VAR(SUM([Sales]))</div><span class="tag warn">spread analysis</span></div>
+  </div>
+</div>
+
+<!-- S16 -->
+<div class="section" id="s16">
+  <h2 class="section-title"><span class="num">16</span> LOOKUP & Position Functions</h2>
+  <div class="func-grid">
+    <div class="func-card"><h3>LOOKUP()</h3><p class="desc">Fetch a value from another row by offset.</p><div class="code-block">LOOKUP(SUM([Sales]), -1)  // previous
+LOOKUP(SUM([Sales]),  1)  // next</div><span class="tag">row comparison</span></div>
+    <div class="func-card"><h3>PREVIOUS_VALUE()</h3><p class="desc">Uses previously computed result — recursive.</p><div class="code-block">PREVIOUS_VALUE(0) + SUM([Sales])</div><span class="tag warn">recursive</span></div>
+    <div class="func-card"><h3>INDEX()</h3><p class="desc">Row number within partition (1, 2, 3…).</p><div class="code-block">INDEX()</div><span class="tag">numbering</span></div>
+    <div class="func-card"><h3>FIRST() / LAST()</h3><p class="desc">Distance from first or last row.</p><div class="code-block">FIRST()  // 0 at first row
+LAST()   // 0 at last row</div><span class="tag">position logic</span></div>
+    <div class="func-card"><h3>SIZE()</h3><p class="desc">Total rows in current partition.</p><div class="code-block">SIZE()</div><span class="tag">partition count</span></div>
+    <div class="func-card"><h3>TOTAL()</h3><p class="desc">Grand total — same value repeated every row.</p><div class="code-block">TOTAL(SUM([Sales]))</div><span class="tag">% of total denominator</span></div>
+  </div>
+</div>
+
+<!-- S17 -->
+<div class="section" id="s17">
+  <h2 class="section-title"><span class="num">17</span> Partitioning vs Addressing</h2>
+  <div class="vs-row">
+    <div class="vs-box left"><h4>Addressing</h4><p class="desc">Direction the calculation moves through.</p><div class="code-block">Example: Across months (left → right)</div><p style="margin-top:0.5rem;font-size:0.82rem;color:var(--text-dim);">Think of it as: <strong style="color:var(--accent)">the path</strong></p></div>
+    <div class="vs-box right"><h4>Partitioning</h4><p class="desc">Groups that restart the calculation.</p><div class="code-block">Example: Running total resets per Region</div><p style="margin-top:0.5rem;font-size:0.82rem;color:var(--text-dim);">Think of it as: <strong style="color:var(--accent2)">the fence</strong></p></div>
+  </div>
+  <div class="callout info">
+    <h4>Example — Running Total Partitioned by Region</h4>
+    <table style="margin-top:0.5rem;"><thead><tr><th>Region</th><th>Month</th><th>Sales</th><th>Running Total</th></tr></thead><tbody><tr><td>East</td><td>Jan</td><td>100</td><td>100</td></tr><tr><td>East</td><td>Feb</td><td>200</td><td>300</td></tr><tr><td>West</td><td>Jan</td><td>50</td><td>50</td></tr><tr><td>West</td><td>Feb</td><td>80</td><td>130</td></tr></tbody></table>
+    <p style="margin-top:0.5rem;"><strong>Partitioned by:</strong> Region &nbsp;|&nbsp; <strong>Addressed across:</strong> Month</p>
+  </div>
+</div>
+
+<!-- S18 -->
+<div class="section" id="s18">
+  <h2 class="section-title"><span class="num">18</span> Order of Operations</h2>
+  <div class="callout info">
+    <h4>Table calculations are applied near the END of Tableau processing</h4>
+    <table style="margin-top:0.5rem;"><thead><tr><th>Order</th><th>Filter Type</th></tr></thead><tbody><tr><td><strong>1</strong></td><td>Extract Filter</td></tr><tr><td><strong>2</strong></td><td>Data Source Filter</td></tr><tr><td><strong>3</strong></td><td>Context Filter</td></tr><tr><td><strong>4</strong></td><td>Dimension Filter</td></tr><tr><td><strong>5</strong></td><td>Measure Filter</td></tr><tr><td><strong>6</strong></td><td>Table Calculation ← applied here</td></tr></tbody></table>
+    <p style="margin-top:0.75rem;">Table calcs run on the <strong>already-filtered, aggregated result set</strong> — not on raw data.</p>
+  </div>
+</div>
+
+<!-- ========== S19: TABLE CALC Q&A ========== -->
+<div class="section" id="s19">
+  <h2 class="section-title"><span class="num">19</span> Table Calc Q&A — With Sample Answers</h2>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">01</span> Running Total vs Window Sum? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Running Total (RUNNING_SUM)</strong> = <strong>cumulative progression</strong>. Values: 100, 300, 450.</p>
+      <p><strong>Window Sum (WINDOW_SUM)</strong> = <strong>same grand total repeated</strong> on every row. Values: 450, 450, 450.</p>
+      <p>Use Running Total when showing how something builds over time. Use Window Sum when you need a denominator for percent-of-total.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">02</span> LOOKUP vs PREVIOUS_VALUE? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>LOOKUP()</strong> fetches an <strong>existing aggregated value</strong> from another row. It reads what's already there.</p>
+      <p><strong>PREVIOUS_VALUE()</strong> uses the <strong>result it computed for the previous row</strong> — it's recursive. First row uses the seed value.</p>
+      <div class="code-block">LOOKUP(SUM([Sales]), -1)         // reads existing
+PREVIOUS_VALUE(0) + SUM([Sales]) // recursive</div>
+      <p>Use LOOKUP for simple comparisons. PREVIOUS_VALUE only for chained/recursive logic.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">03</span> Can table calcs affect performance? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Yes.</strong> Table calcs run in the <strong>Tableau layer</strong>, not in the database. The DB returns the full result set, then Tableau applies calcs in memory.</p>
+      <p>If your query returns 1M rows, all 1M rows go through the table calc engine. This is why large cross-tabs with multiple table calcs are slow.</p>
+      <p><strong>Fix:</strong> Use context filters to reduce result set before table calcs. Or replace with LOD expressions where possible — LODs push computation to the database.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">04</span> What is Partitioning vs Addressing? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Addressing</strong> = direction the calculation moves. "The path."</p>
+      <p><strong>Partitioning</strong> = groups that restart the calculation. "The fence."</p>
+      <p><strong>Example:</strong> Running total across months (addressing = Month), reset per region (partitioning = Region).</p>
+      <p>Configure via "Compute Using" — the fields you select are addressing; everything else is partitioning.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">05</span> Where do table calcs sit in the order of operations? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>At the <strong>very end</strong>: Extract → Data Source → Context → Dimension → Measure → <strong>Table Calcs</strong>.</p>
+      <p>If you put a table calc on Filters shelf, it filters AFTER the query runs. The data was already fetched. A Top N filter using RANK() still fetches all data — it just hides rows at display level.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">06</span> TOTAL() vs WINDOW_SUM()? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>Both give a sum across the partition. But <strong>TOTAL()</strong> always sums the <strong>entire partition</strong>.</p>
+      <p><strong>WINDOW_SUM()</strong> accepts start/end parameters so you can sum a <strong>sub-range</strong>.</p>
+      <div class="code-block">TOTAL(SUM([Sales]))              // always full partition
+WINDOW_SUM(SUM([Sales]), -2, 0)  // last 3 rows only</div>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">07</span> How to show Top N using table calcs? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">// Create calculated field:
+RANK(SUM([Sales]))
+
+// Drag to Filters shelf → range 1 to N</div>
+      <p><strong>Important:</strong> This is a table calc filter — runs after the query. All data is still fetched. For better performance, use a regular Top N filter, Sets, or context filter.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">08</span> How does WINDOW_AVG(-2, 0) work? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><code>-2, 0</code> means: go <strong>2 rows back</strong> from current, up to <strong>current row (0)</strong>. Averages 3 rows: current + 2 previous.</p>
+      <p>First 2 rows don't have enough previous rows — Tableau averages whatever is available. To show NULL instead:</p>
+      <div class="code-block">IF INDEX() >= 3
+THEN WINDOW_AVG(SUM([Sales]), -2, 0)
+END</div>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">09</span> Different RANK types in Tableau? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>RANK()</strong> — Standard. Ties get same rank, next is skipped: 1, 2, 2, 4.</p>
+      <p><strong>RANK_DENSE()</strong> — Dense. Ties same, next NOT skipped: 1, 2, 2, 3.</p>
+      <p><strong>RANK_MODIFIED()</strong> — Ties get the higher rank: 1, 3, 3, 4.</p>
+      <p><strong>RANK_PERCENTILE()</strong> — Returns percentile position (0 to 1).</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">10</span> Table Calc vs LOD — when to use which? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Table Calcs:</strong> Operate on the <strong>result set after query</strong>. Depend on what's in the view (Rows/Columns pills).</p>
+      <p><strong>LODs:</strong> Operate at the <strong>data source level</strong>. Push computation to the database. Don't depend on view layout.</p>
+      <p><strong>Use Table Calcs for:</strong> running totals, moving averages, ranking, % of total — things needing the visible layout.</p>
+      <p><strong>Use LODs for:</strong> customer-level aggregates at order level, cohort analysis, different granularity than the view.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- S20 -->
+<div class="section" id="s20">
+  <h2 class="section-title"><span class="num">20</span> Golden Formulas — Memorize These</h2>
+  <div class="golden">
+    <h4>⚡ The 8 Formulas You Must Know</h4>
+    <div class="calc-grid" style="margin-top:0.85rem;">
+      <div class="calc-card" style="background:var(--code-bg);"><p class="desc" style="margin-bottom:0.2rem;">Running Total</p><div class="code-block">RUNNING_SUM(SUM([Sales]))</div></div>
+      <div class="calc-card" style="background:var(--code-bg);"><p class="desc" style="margin-bottom:0.2rem;">Window Sum</p><div class="code-block">WINDOW_SUM(SUM([Sales]))</div></div>
+      <div class="calc-card" style="background:var(--code-bg);"><p class="desc" style="margin-bottom:0.2rem;">Previous Row Value</p><div class="code-block">LOOKUP(SUM([Sales]), -1)</div></div>
+      <div class="calc-card" style="background:var(--code-bg);"><p class="desc" style="margin-bottom:0.2rem;">Rank</p><div class="code-block">RANK(SUM([Sales]))</div></div>
+      <div class="calc-card" style="background:var(--code-bg);"><p class="desc" style="margin-bottom:0.2rem;">Row Index</p><div class="code-block">INDEX()</div></div>
+      <div class="calc-card" style="background:var(--code-bg);"><p class="desc" style="margin-bottom:0.2rem;">First / Last</p><div class="code-block">FIRST()   LAST()</div></div>
+      <div class="calc-card" style="background:var(--code-bg);"><p class="desc" style="margin-bottom:0.2rem;">3-Month Moving Avg</p><div class="code-block">WINDOW_AVG(SUM([Sales]), -2, 0)</div></div>
+      <div class="calc-card" style="background:var(--code-bg);"><p class="desc" style="margin-bottom:0.2rem;">Percent of Total</p><div class="code-block">SUM([Sales]) / TOTAL(SUM([Sales]))</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== BONUS ==================== -->
+<div class="part-divider">
+  <h1>Bonus — More Interview Q&A</h1>
+  <p>LOD Expressions, Filters & Performance, Dashboard Design</p>
+</div>
+
+<!-- S21 -->
+<div class="section" id="s21">
+  <h2 class="section-title"><span class="num">21</span> LOD Expressions — Q&A</h2>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">01</span> What are LOD Expressions? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>LOD (Level of Detail) expressions let you control the <strong>granularity</strong> of a calculation independent of the view. They compute at the data source level.</p>
+      <p>Three types: <strong>FIXED</strong> (compute at a specific level), <strong>INCLUDE</strong> (add a dimension), <strong>EXCLUDE</strong> (remove a dimension).</p>
+      <div class="code-block">{ FIXED [Customer] : SUM([Sales]) }
+{ INCLUDE [Product] : AVG([Profit]) }
+{ EXCLUDE [Region] : SUM([Sales]) }</div>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">02</span> FIXED vs INCLUDE vs EXCLUDE — when to use? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>FIXED:</strong> Ignores the view. "Total sales per customer, no matter what's on the view." Used for: customer lifetime value, cohort dates, first purchase date.</p>
+      <p><strong>INCLUDE:</strong> Adds a dimension the view doesn't have. "I'm showing Region, but need per-customer averages." Adds Customer temporarily.</p>
+      <p><strong>EXCLUDE:</strong> Removes a dimension the view has. "I'm showing Month, but want annual totals." Removes Month from the calc.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">03</span> Do dimension filters affect FIXED LOD? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>No</strong> — classic interview trap. FIXED LODs are evaluated <strong>before</strong> dimension filters in the order of operations. Only <strong>context filters</strong>, extract filters, and data source filters affect them.</p>
+      <p>If you want a dimension filter to affect a FIXED LOD, promote it to a <strong>context filter</strong> (right-click → Add to Context).</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">04</span> Find each customer's first order date? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <div class="code-block">{ FIXED [Customer ID] : MIN([Order Date]) }</div>
+      <p>Returns the same first-order date for every row of that customer, regardless of the view. Common in cohort analysis — group customers by when they first purchased.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">05</span> Average of per-customer totals (nested aggregation)? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>You can't nest aggregates in Tableau (no AVG(SUM(…))). LOD solves this:</p>
+      <div class="code-block">// Step 1: Each customer's total (row-level result)
+{ FIXED [Customer ID] : SUM([Sales]) }
+
+// Step 2: Average those totals
+AVG({ FIXED [Customer ID] : SUM([Sales]) })</div>
+      <p>Step 1 produces a row-level value. Step 2 aggregates those values normally.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- S22 -->
+<div class="section" id="s22">
+  <h2 class="section-title"><span class="num">22</span> Filters & Performance — Q&A</h2>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">01</span> What is a Context Filter? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>A context filter creates a <strong>temporary table</strong> of filtered results. All other filters run on top of it. Evaluated <strong>before</strong> dimension filters and FIXED LODs.</p>
+      <p><strong>Use when:</strong></p>
+      <p>• You want a dimension filter to affect a FIXED LOD</p>
+      <p>• Top N filter should work within a subset (Top 5 in East region only)</p>
+      <p>• Performance optimization — reduces working set for subsequent filters</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">02</span> Extract vs Live connection — performance? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Live:</strong> Queries the DB directly every time. Good for real-time data. Slower if DB is slow or network has latency.</p>
+      <p><strong>Extract (.hyper):</strong> Snapshot stored locally in Tableau's columnar format. Much faster for queries, works offline. Data only as fresh as last refresh.</p>
+      <p><strong>Rule:</strong> Use extracts where slight staleness is OK. Use live for real-time monitoring.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">03</span> How to improve dashboard performance? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Data layer:</strong> Use extracts, reduce row count, aggregate to needed granularity, hide unused fields.</p>
+      <p><strong>View layer:</strong> Keep marks under 10K. Avoid wide cross-tabs. Use context filters. Minimize INCLUDE/EXCLUDE LODs (slower than FIXED).</p>
+      <p><strong>Design layer:</strong> Fewer sheets per dashboard. Avoid redundant calcs. Use Performance Recorder (Help → Settings → Performance Recording).</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">04</span> Data Source filter vs Extract filter? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Extract filter:</strong> Applied when extract is created. Data not matching is <strong>physically excluded</strong> from .hyper file. Most efficient.</p>
+      <p><strong>Data source filter:</strong> Applied at query time. Reduces what's sent but full dataset still exists in source.</p>
+      <p>Use extract filters for large-scale exclusions (old years, inactive records). Use data source filters for row-level security.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- S23 -->
+<div class="section" id="s23">
+  <h2 class="section-title"><span class="num">23</span> Dashboard & Design — Q&A</h2>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">01</span> What are Actions in Tableau? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>Actions add interactivity to dashboards:</p>
+      <p><strong>Filter Action:</strong> Clicking a mark filters other sheets. Most common.</p>
+      <p><strong>Highlight Action:</strong> Highlights related marks across sheets.</p>
+      <p><strong>URL Action:</strong> Opens a web page — drill-through to external systems.</p>
+      <p><strong>Go to Sheet:</strong> Navigates between dashboards.</p>
+      <p><strong>Set Action:</strong> Clicking adds/removes values from a set — powerful for dynamic filtering.</p>
+      <p><strong>Parameter Action:</strong> User clicks update a parameter — what-if scenarios.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">02</span> Blending vs Joining? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Join:</strong> Combines data at <strong>row level</strong> before aggregation. Done in Data Source tab. Can cause duplication if granularity doesn't match.</p>
+      <p><strong>Blend:</strong> Combines data <strong>after aggregation</strong>. Secondary source aggregated to match primary's granularity. Useful when sources can't be joined.</p>
+      <p><strong>Modern alternative:</strong> Use <strong>Relationships</strong> (2020.2+) — they handle granularity mismatches automatically. Now the recommended approach.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">03</span> What are Sets? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>A Set is a <strong>custom subset</strong> — creates a binary IN/OUT classification.</p>
+      <p><strong>Fixed Set:</strong> Manually pick members (e.g., "East" and "West").</p>
+      <p><strong>Computed Set:</strong> Based on a condition (e.g., "Top 10 by sales").</p>
+      <p><strong>Combined Sets:</strong> Union or intersection of two sets.</p>
+      <p><strong>Set Actions:</strong> Users dynamically add/remove members by clicking. Very powerful for interactive analysis.</p>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">04</span> Parameter vs Filter — what's the difference? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>A <strong>Parameter</strong> is just a value holder (number, string, date). Does nothing alone — must be referenced in a calculated field, filter, or reference line.</p>
+      <p>A <strong>Filter</strong> directly restricts which data is shown.</p>
+      <p><strong>Use parameters for:</strong> Dynamic Top N, what-if analysis, measure swapping, dynamic date ranges.</p>
+      <div class="code-block">// Dynamic Top N:
+RANK(SUM([Sales])) &lt;= [Top N Parameter]</div>
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q" onclick="this.parentElement.classList.toggle('open')"><span class="q-num">05</span> How to publish and share dashboards? <span class="arrow">▼</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p><strong>Tableau Server / Cloud:</strong> Publish from Desktop → Server → Publish Workbook. Set permissions, schedule extract refreshes, organize into projects.</p>
+      <p><strong>Tableau Public:</strong> Free, but all data is public. Good for portfolio.</p>
+      <p><strong>Key concepts:</strong> User roles (Viewer/Explorer/Creator), row-level security via user filters, extract refresh schedules, subscription emails for automated delivery.</p>
+    </div></div>
+  </div>
+</div>
+
+</div><!-- /container -->
+</div><!-- /main -->
+
+<script>
+// Sidebar active state
+const sections = document.querySelectorAll('.section');
+const links = document.querySelectorAll('.sidebar a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector('.sidebar a[href="#' + e.target.id + '"]');
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => { if (s.id) observer.observe(s); });
+
+// Mobile: close sidebar on link click
+links.forEach(l => l.addEventListener('click', () => {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.querySelector('.overlay').classList.remove('open');
+}));
+</script>
+</body>
+</html>
