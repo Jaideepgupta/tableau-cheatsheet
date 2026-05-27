@@ -127,7 +127,7 @@ Includes detailed explanations for:
 
 ## Desktop View
 
-![Preview](./preview.png)
+![Preview](https://github.com/Jaideepgupta/tableau-cheatsheet/blob/main/Screenshot%202026-05-27%20165230.png)
 
 ---
 
